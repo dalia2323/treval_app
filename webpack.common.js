@@ -1,54 +1,43 @@
-const path = require("path");
-const webpack = require("webpack");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const webpack = require("webpack"),
+    htmlWebpackPlugin = require("html-webpack-plugin"),
+    { CleanWebpackPlugin } = require('clean-webpack-plugin'),
+    CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
-module.exports = {
-    entry: path.resolve(__dirname, "src/client/index.js"), // تأكد من أن هذا الملف موجود
-    output: {
-        path: path.resolve(__dirname, "dist"), // مجلد الخرج
-        filename: "bundle.js"
-    },
-    mode: "production", // تأكد من ضبط الوضع
-    module: {
-        rules: [
-            {
-                test: /\.js$/, // تمت إزالة علامات الاقتباس
-                exclude: /node_modules/,
-                use: {
+
+    module.exports = {
+        entry: ["./src/client/index.js"],
+        module: {
+            rules: [
+                {
+                    test: '/\.js$/',
+                    exclude: /node_modules/,
                     loader: "babel-loader"
-                }
-            },
-            {
-                test: /\.css$/,
-                use: ["style-loader", "css-loader"]
-            }
+                },
+            ]
+        },
+    
+        optimization: {
+            minimizer: [
+                // For webpack@5 you can use the `...` syntax to extend existing minimizers (i.e. `terser-webpack-plugin`), uncomment the next line
+                // `...`,
+                new CssMinimizerPlugin(),
+            ],
+            minimize: true,
+          },
+        plugins: [
+            new htmlWebpackPlugin({
+                template: "./src/client/views/index.html",
+                filename: "./index.html"
+            }),
+            new CleanWebpackPlugin({
+                // Simulate the removal of files
+                dry: true,
+                // Write Logs to Console
+                verbose: false,
+                // Automatically remove all unused webpack assets on rebuild
+                cleanStaleWebpackAssets: true,
+                protectWebpackAssets: false,
+               
+            }),
         ]
-    },
-    optimization: {
-        minimizer: [
-            "...", // يحتفظ بالمصغرات الافتراضية مثل Terser
-            new CssMinimizerPlugin()
-        ],
-        minimize: true
-    },
-    plugins: [
-        new HtmlWebpackPlugin({
-            template: path.resolve(__dirname, "src/client/views/index.html"), // تأكد من وجوده
-            filename: "index.html"
-        }),
-        new CleanWebpackPlugin({
-            dry: false, // قم بتغيير هذا إلى false ليتم الحذف الفعلي
-            verbose: true, // لتظهر السجلات في الكونسول
-            cleanStaleWebpackAssets: true,
-            protectWebpackAssets: false
-        })
-    ],
-    devServer: {
-        static: path.resolve(__dirname, "dist"),
-        hot: true,
-        open: true
     }
-};
