@@ -11,7 +11,7 @@ require("dotenv").config()
 
 //get the city function which get location from geoNames
 const  {getCityLoc} = require("./getCityLoc")
-const {weatherTemp} = require("./weatherTemp")
+const {getWeather} = require("./getWeather")
 const {getCityPic} = require("./getCityPic")
 
 //using cors
@@ -40,8 +40,8 @@ app.post("/getCity", async (req,res) => {
 })
 
 app.post("/getWeather", async (req,res) => {
-   const {lng, lat, remainingDays} = req.body
-   const getWeather = await weatherTemp(lng, lat, remainingDays, WEATHER_KEY)
+   const {lng, lat, Rdays} = req.body
+   const getWeather = await weatherTemp(lng, lat, Rdays, WEATHER_KEY)
    return res.send(getWeather)
 })
 
