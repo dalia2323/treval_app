@@ -11,11 +11,31 @@ const handleSubmit = async (e) => {
     return;
 }
   const Location = await getCity();
-  const { name, lang, lat } = Location;  // Fix: use `Location` instead of `location`
+  if(Location.error){
+    city_error.textContent=`${Location.error}`;
+    city_error.style.display="block";
+    return;
+  }
+  city_error.style.display="none";
+  const { name, lang, lat } = Location; 
   const date = dateInp.value;
-  const Rdays = getRdays(date);  // Fix: pass `date` to `getRdays`
+  const Rdays = getRdays(date);  
+  if(Rdays<0){
+    date_error.textContent=`Date can not be in the past`;
+    date_error.style.display="block";
+    return;
+  }
+  date_error.style.display="none";
+
   const getWeather = await getWeather(lang, lat, Rdays);
-  const { image } = await getCityPic(name);  // Fix: Await the result of `getCityPic`
+  if(getWeather.error){
+    date_error.textContent=`${getWeather.message}`;
+    date_error.style.display="block";
+    return;
+  }
+  date_error.style.display="none";
+
+  const { image } = await getCityPic(name); 
   updateUI(Rdays, name, image, getWeather);
 };
 
@@ -75,6 +95,8 @@ const updateUI = (Rdays, city, pic, weather) => {
 
 // Validate inputs (implement if necessary)
 const validate_inputs = () => {
+    city_error.style.display="none";
+    date_error.style.display="none";
 if(!cityInp.value){
     city_error.innerHTML=`you need to enter a name of city`;
     city_error.style.display="block";
@@ -85,6 +107,11 @@ if(!dateInp.value){
     date_error.style.display="block";
     return;
 
+}
+if(getRdays(dateInp.value)<0){
+    date_error.innerHTML=`<i class="bi bi-exclamation-circle-fill me-2"></i>date cant be in past`;
+    date_error.style.display="block";
+    return;
 }
 return true;
 };
