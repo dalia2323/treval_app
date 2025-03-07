@@ -17,7 +17,8 @@ const {getCityPic} = require("./getCityPic")
 //using cors
 app.use(cors())
 
-port = 8000
+const port = 8000;
+app.listen(port, () => console.log(`Server is listening on port ${port}`));
 
 //I had to fix an issue with the env file that it doesn't want to get the integers in my username so i made
 // a separate const for them
@@ -39,11 +40,16 @@ app.post("/getCity", async (req,res) => {
    
 })
 
-app.post("/getWeather", async (req,res) => {
-   const {lng, lat, Rdays} = req.body
-   const getWeather = await weatherTemp(lng, lat, Rdays, WEATHER_KEY)
-   return res.send(getWeather)
-})
+// app.post("/getWeather", async (req,res) => {
+//    const {lng, lat, Rdays} = req.body
+//    const getWeather = await weatherTemp(lng, lat, Rdays, WEATHER_KEY)
+//    return res.send(getWeather)
+// })
+app.post("/getWeather", async (req, res) => {
+  const { lng, lat, Rdays } = req.body;
+  const weatherData = await getWeather(lat, lng, Rdays, WEATHER_KEY);
+  return res.send(weatherData);
+});
 
 app.post("/getPic", async (req,res) => {
   const {name} = req.body
