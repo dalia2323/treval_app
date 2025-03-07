@@ -2,11 +2,12 @@
   "name": "test-webpack",
   "version": "1.0.0",
   "description": "",
-  "main": "bundle.js",
+  "main": "src/server/index.js",
   "scripts": {
     "test": "jest",
-    "start": "nodemon src/server/index.js",
-    "dev": " webpack-dev-server --config webpack.dev.js --open",
+    "prestart": "rmdir /s /q dist && npm run build",
+"start": "nodemon src/server/server.js",
+    "dev": "webpack-dev-server --config webpack.dev.js --open",
     "build": "webpack --config webpack.prod.js"
   },
   "keywords": [],
@@ -14,12 +15,11 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^1.4.0",
-    "clean-webpack-plugin": "^4.0.0",
-    "core-js": "^3.31.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "nodemon": "^2.0.22",
+    "sass": "^1.85.1",
     "valid-url": "^1.0.9",
     "webpack": "^5.88.0",
     "webpack-cli": "^5.1.4"
@@ -34,11 +34,11 @@
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
     "mini-css-extract-plugin": "^2.7.6",
-    "node-sass": "^9.0.0",
     "sass-loader": "^13.3.2",
     "style-loader": "^3.3.3",
     "terser-webpack-plugin": "^5.3.9",
     "webpack-dev-server": "^4.15.1",
-    "webpack-merge": "^5.9.0"
+    "webpack-merge": "^5.9.0",
+    "clean-webpack-plugin": "^4.0.0"
   }
 }
