@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getRdays } from "./getRdays";
 const form = document.querySelector("form");
 const dateInp = document.querySelector("#date");
 const city_error=document.querySelector("#city_error");
@@ -48,13 +49,13 @@ const getCity = async () => {
   return data;
 };
 
-const getRdays = (date) => {
-  const now = new Date();
-  const travelDate = new Date(date);
-  const timeDifference = travelDate.getTime() - now.getTime();
-  const Rdays = Math.ceil(timeDifference / (1000 * 3600 * 24));
-  return Rdays;
-};
+// const getRdays = (date) => {
+//   const now = new Date();
+//   const travelDate = new Date(date);
+//   const timeDifference = travelDate.getTime() - now.getTime();
+//   const Rdays = Math.ceil(timeDifference / (1000 * 3600 * 24));
+//   return Rdays;
+// };
 
 const getWeather = async (lang, lat, Rdays) => {
   const { data } = await axios.post("http://localhost:8000/getWeather", {
