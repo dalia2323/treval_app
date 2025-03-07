@@ -45,10 +45,10 @@ app.post("/getWeather", async (req,res) => {
    return res.send(getWeather)
 })
 
-app.post("/getCityPic", async (req,res) => {
-  const {city_name} = req.body
-  const getPic = await getCityPic(city_name, pixabay_key)
-  return res.send(getPic)
+app.post("/getPic", async (req,res) => {
+  const {name} = req.body
+  const Picture = await getCityPic(name, pixabay_key)
+  return res.send(Picture)
 })
 
 app.listen(8000, () => console.log(`server is listening on port ${port}`))
