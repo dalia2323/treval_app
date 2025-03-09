@@ -45,18 +45,18 @@ const handleSubmit = async (e) => {
   updateUI(Rdays, name, image, getWeather);
 };
 
-const getCity = async () => {
-  const city = document.querySelector("#city").value;
-  const { data } = await axios.post("http://localhost:8000/getCity", { city }, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  return data;
-};
+// const getCity = async () => {
+//   const city = document.querySelector("#city").value;
+//   const { data } = await axios.post("http://localhost:3003/api/getCity", { city }, {
+//     headers: {
+//       "Content-Type": "application/json",
+//     },
+//   });
+//   return data;
+// };
 
-const getWeather = async (lang, lat, Rdays) => {
-  const { data } = await axios.post("http://localhost:8000/getWeather", {
+const fetchWeather = async (lang, lat, Rdays) => { // ← غير الاسم
+  const { data } = await axios.post("http://localhost:3003/api/getWeather", {
     lat,
     lang,
     Rdays,
@@ -65,12 +65,23 @@ const getWeather = async (lang, lat, Rdays) => {
 };
 
 const getCityPic = async (name) => {
-  const { data } = await axios.post("http://localhost:8000/getPic", {
+  const { data } = await axios.post("http://localhost:3003/api/getPic", {
     name,
   });
   return data;
 };
+const getCity = async () => {
+  const city = document.querySelector("#city").value;
+  if (!city) return;
 
+  try {
+    const { data } = await axios.post("http://localhost:3003/api/getCity", { city });
+    return data;
+  } catch (error) {
+    console.error("Error fetching city:", error.response?.data);
+    throw error;
+  }
+};
 const updateUI = (Rdays, city, pic, weather) => {
   document.querySelector("#Rdays").innerHTML = `Your trip starts in ${Rdays} days.`;
   document.querySelector(".cityName").textContent = `Location: ${city}`;
@@ -110,5 +121,8 @@ const validate_inputs = () => {
   }
   return true;
 };
-
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('travelForm');
+  form.addEventListener('submit', handleSubmit);
+});
 export { handleSubmit };

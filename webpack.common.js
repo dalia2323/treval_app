@@ -1,13 +1,17 @@
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/client/index.js', // نقطة الدخول
+  entry: path.resolve(__dirname, './src/client/index.js'),
   output: {
-    filename: '[name].[contenthash].js', // اسم الملف مع [contenthash] لضمان تجنب الكاش
-    path: path.resolve(__dirname, 'dist'), // مسار الخرج
-    libraryTarget: 'var', // تعيين نمط المكتبة
-    library: 'Client', // اسم المكتبة
-    clean: true, // تنظيف مجلد dist عند كل بناء
+    filename: '[name].[contenthash].js',
+    path: path.resolve(__dirname, 'dist'),
+    publicPath: '/',
+    clean: true,
+    libraryTarget: 'var', 
+    library: 'Client', 
+    libraryTarget: 'window', 
+    clean: true
   },
   module: {
     rules: [
@@ -17,17 +21,28 @@ module.exports = {
         use: {
           loader: 'babel-loader',
           options: {
-            presets: ['@babel/preset-env'],
-          },
-        },
+            presets: ['@babel/preset-env']
+          }
+        }
       },
       {
         test: /\.s[ac]ss$/i,
-        use: ['style-loader', 'css-loader', 'sass-loader'], // استخدام loaders لملفات sass
+        use: ['style-loader', 'css-loader', 'sass-loader']
       },
-    ],
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource'
+      }
+    ]
   },
+  plugins: [
+    new HtmlWebpackPlugin({
+      template: './src/client/views/index.html',
+      filename: 'index.html', 
+      inject: 'body'
+    })
+  ],
   resolve: {
-    extensions: ['.js', '.scss'], // إضافة الامتدادات التي سيتم حلها
-  },
+    extensions: ['.js', '.scss']
+  }
 };
