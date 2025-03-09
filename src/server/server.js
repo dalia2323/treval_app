@@ -4,11 +4,12 @@ const app = express();
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
-
 // تحقق من متغيرات البيئة
 const username = process.env.USERNAME;
 const WEATHER_KEY = process.env.WEATHER_KEY;
-const pixabay_key = process.env.pixabay_key;
+const pixabay_key =process.env.PIXABAY_KEY;
+console.log("GeoNames Username: ", username);  // هنا تطبع المتغير من الخادم
+
 
 if (!username || !WEATHER_KEY || !pixabay_key) {
   console.error('Missing environment variables!');
@@ -17,6 +18,7 @@ if (!username || !WEATHER_KEY || !pixabay_key) {
 
 // Middleware
 app.use(express.json());
+console.log("NODE_ENV:", process.env.NODE_ENV);
 
 // CORS Configuration
 const corsOptions = {
@@ -44,8 +46,10 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
-
-app.use(cors(corsOptions));
+app.use(cors({
+  origin: "*", 
+  credentials: true
+}));
 
 // Static Files
 app.use(express.static(path.join(__dirname, "../../dist")));
@@ -62,6 +66,7 @@ app.get("/", (req, res) => {
 });
 
 app.post("/api/getCity", async (req, res) => {
+  console.log("Received request body:", req.body); 
   try {
     const { city } = req.body;
     
@@ -96,6 +101,7 @@ app.post("/api/getCity", async (req, res) => {
       details: error.message
     });
   }
+
 });
 
 
