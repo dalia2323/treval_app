@@ -5,31 +5,14 @@ const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
 
-
 // تحقق من متغيرات البيئة
-
 const WEATHER_KEY = process.env.WEATHER_KEY;
-const pixabay_key =process.env.PIXABAY_KEY;
+const pixabay_key = process.env.PIXABAY_KEY;
 const usernumber = Number(process.env.USERNUMBER);
 const username = process.env.USERNAME;
-// const username = userstring.concat(String(usernumber));
-
-console.log("USERNAME:", process.env.USERNAME);
-console.log("USERNUMBER:", process.env.USERNUMBER);
-console.log(typeof process.env.USERNUMBER); // هل يطبع "string" أو "number"؟
-
-console.log("GeoNames Username: ", username);  // هنا تطبع المتغير من الخادم
-
-console.log(typeof usernumber); // تأكدي أنه يطبع "number"
-
-if (!username || !WEATHER_KEY || !pixabay_key) {
-  console.error('Missing environment variables!');
-  process.exit(1);
-}
 
 // Middleware
 app.use(express.json());
-console.log("NODE_ENV:", process.env.NODE_ENV);
 
 // CORS Configuration
 const corsOptions = {
@@ -37,14 +20,14 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',
       'http://127.0.0.1:3000',
-      'http://localhost:8080'
+      'http://localhost:8080',
+      'http://localhost:3003',
+      'http://127.0.0.1:3003',
+      'http://localhost:5173' // أضف منفذ الواجهة الأمامية (مثل Vite)
     ];
     
     if (process.env.NODE_ENV === 'development') {
-      allowedOrigins.push(
-        'http://localhost:3003',
-        'http://127.0.0.1:3003'
-      );
+      allowedOrigins.push('http://localhost:5173');
     }
 
     if (!origin || allowedOrigins.includes(origin)) {
@@ -57,77 +40,49 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 };
-app.use(cors({
-  origin: "*", 
-  credentials: true
-}));
-
+app.use(cors(corsOptions));
 
 // Static Files
 app.use(express.static(path.join(__dirname, "../../dist")));
 
-// Logging Middleware
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
-});
-
 // Routes
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../../dist/index.html"));
-});
-
 app.post("/api/getCity", async (req, res) => {
-  console.log("Received request body:", req.body); 
   try {
     const { city } = req.body;
-    
     if (!city) return res.status(400).json({ error: "City parameter is required" });
     
     const encodedCity = encodeURIComponent(city);
-    // const url = `http://api.geonames.org/postalCodeSearchJSON?q=${encodedCity}&maxRows=10&username=${username}`;
-    const url = `http://api.geonames.org/postalCodeSearchJSON?placename=${encodeURIComponent(city)}&maxRows=10&username=${username}`;
-
+    const url = `http://api.geonames.org/searchJSON?q=${encodedCity}&maxRows=10&username=${username}`;
+    
     const response = await axios.get(url);
     
     if (response.data.status?.message) {
       throw new Error(`GeoNames Error: ${response.data.status.message}`);
     }
     
-    if (!response.data.postalCodes?.length) {
+    if (!response.data.geonames?.length) {
       return res.status(404).json({ error: "City not found" });
     }
 
     const locationData = {
-      name: response.data.postalCodes[0].placeName,
-      lat: response.data.postalCodes[0].lat,
-      lng: response.data.postalCodes[0].lng
+      name: response.data.geonames[0].name,
+      lat: response.data.geonames[0].lat,
+      lng: response.data.geonames[0].lng
     };
     
     res.json(locationData);
     
   } catch (error) {
-    console.error("GeoNames API Error:", error);
+    console.error("GeoNames API Error:", error.response?.data || error.message);
     res.status(500).json({ 
       error: "Failed to fetch location data",
-      details: error.message
+      details: error.response?.data?.status?.message || error.message
     });
   }
-
-});
-
-
-// Error Handling
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  process.exit(1);
 });
 
 // Server Setup
 const PORT = process.env.PORT || 3003;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  console.log(`GeoNames username: ${username}`);
-  console.log(`Weatherbit key: ${WEATHER_KEY ? "***" : "Not set"}`);
-  console.log(`Pixabay key: ${pixabay_key ? "***" : "Not set"}`);
 });
