@@ -51,7 +51,7 @@ src/
    ```sh
    npm install
    ```
-3. Create a `.env` file and add the required API keys:
+3.  `.env` file and add the required API keys:
    ```sh
  USERNAME=dalia_isleem
 USERNUMBER=20
