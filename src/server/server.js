@@ -4,12 +4,23 @@ const app = express();
 const cors = require("cors");
 const path = require("path");
 require("dotenv").config();
+
+
 // تحقق من متغيرات البيئة
-const username = process.env.USERNAME;
+
 const WEATHER_KEY = process.env.WEATHER_KEY;
 const pixabay_key =process.env.PIXABAY_KEY;
+const usernumber = Number(process.env.USERNUMBER);
+const username = process.env.USERNAME;
+// const username = userstring.concat(String(usernumber));
+
+console.log("USERNAME:", process.env.USERNAME);
+console.log("USERNUMBER:", process.env.USERNUMBER);
+console.log(typeof process.env.USERNUMBER); // هل يطبع "string" أو "number"؟
+
 console.log("GeoNames Username: ", username);  // هنا تطبع المتغير من الخادم
 
+console.log(typeof usernumber); // تأكدي أنه يطبع "number"
 
 if (!username || !WEATHER_KEY || !pixabay_key) {
   console.error('Missing environment variables!');
@@ -50,6 +61,7 @@ app.use(cors({
   origin: "*", 
   credentials: true
 }));
+
 
 // Static Files
 app.use(express.static(path.join(__dirname, "../../dist")));
