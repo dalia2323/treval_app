@@ -124,3 +124,4 @@ const validate_inputs = () => {
 document.addEventListener('DOMContentLoaded', () => {
   form.addEventListener('submit', handleSubmit);
 });
+export { handleSubmit };
