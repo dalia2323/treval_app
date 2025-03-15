@@ -44,14 +44,14 @@ src/
 ## Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repo/travel-app.git
+   git clone https://github.com/dalia2323/treval_app.git
    cd travel-app
    ```
 2. Install dependencies:
    ```sh
    npm install
    ```
-3. Create a `.env` file and add the required API keys:
+3.  `.env` file and add the required API keys:
    ```sh
  USERNAME=dalia_isleem
 USERNUMBER=20
