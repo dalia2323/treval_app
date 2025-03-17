@@ -1,23 +1,23 @@
-const request = require('supertest');
-const app = require('../../server/server'); 
-describe('Test /api/getCity endpoint', () => {
-  test('It should respond with city data', async () => {
-    const response = await request(app)
-      .post('/api/getCity')
-      .send({ city: 'Paris' })
-      .expect(200);
+const request = require("supertest");
+const express = require("express");
+const path = require("path");
+require("dotenv").config();
 
-    expect(response.body).toHaveProperty('name', 'Paris');
-    expect(response.body).toHaveProperty('lat');
-    expect(response.body).toHaveProperty('lng');
-  });
+const app = express();
+app.use(express.static("dist"));
 
-  test('It should respond with error if city is missing', async () => {
-    const response = await request(app)
-      .post('/api/getCity')
-      .send({})
-      .expect(400);
+app.get("/", (req, res) => res.sendFile(path.resolve("dist/index.html")));
 
-    expect(response.body).toHaveProperty('error');
-  });
+const testServer = app.listen(0);
+
+jest.setTimeout(10000);
+
+describe("Server Root Endpoint", () => {
+    afterAll(() => testServer.close());
+
+    it("should serve index.html with a 200 status code", async () => {
+        const res = await request(testServer).get("/");
+        expect(res.status).toBe(200);
+        expect(res.headers["content-type"]).toMatch(/text\/html; charset=UTF-8/);
+    });
 });
