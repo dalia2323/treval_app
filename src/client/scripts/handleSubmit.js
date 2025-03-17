@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getRemainingDays } from "./daysLeft";
 
 const formElement = document.querySelector("#travelForm");
 const cityInput = document.getElementById("city");
@@ -6,7 +7,7 @@ const dateInput = document.getElementById("date");
 const errorCity = document.getElementById("city_error");
 const errorDate = document.getElementById("date_error");
 
-formElement.addEventListener('submit', async (event) => {
+const handleSubmit = async (event) => {
   event.preventDefault();
 
   resetErrors();
@@ -41,14 +42,19 @@ formElement.addEventListener('submit', async (event) => {
 
     const imageURL = await fetchCityImage(cityData.name);
 
-    updateTripDetails(cityData.city, daysLeft, weatherDetails, imageURL);
+    updateTripDetails(cityData.name, daysLeft, weatherDetails, imageURL);
 
   } catch (err) {
     console.error("Unexpected error:", err);
   }
+};
+
+// إرفاق مستمع الحدث بوضوح
+document.addEventListener('DOMContentLoaded', () => {
+  formElement.addEventListener('submit', handleSubmit);
 });
 
-// Utility Functions
+// دوالك المساعدة
 
 const fetchCityData = async (city) => {
   try {
@@ -74,8 +80,9 @@ const retrieveWeatherInfo = async ({ lat, lng }, daysAhead) => {
 
 const fetchCityImage = async (cityName) => {
   try {
-    const response = await axios.post("http://localhost:3003/api/getPic", 
-      { name: cityName }, 
+    const response = await axios.post(
+      "http://localhost:3003/api/getPic",
+      { name: cityName },
       { headers: { "Content-Type": "application/json" } }
     );
     return response.data.image;
@@ -115,4 +122,6 @@ const resetErrors = () => {
     err.style.display = "none";
   });
 };
-export { calculateDaysRemaining };
+
+// التصدير الصحيح والواضح
+export { handleSubmit };
