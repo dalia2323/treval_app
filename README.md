@@ -53,14 +53,13 @@ src/
    ```
 3.  `.env` file and add the required API keys:
    ```sh
- USERNAME=dalia_isleem
-USERNUMBER=20
+ GO=dalia_isleem
 WEATHER_KEY=6ac4884e7e714e50ac60d29055997f2b
 PIXABAY_KEY=49219850-f17b895fdf8da291b7b3d49c6
 
    PORT=3003
    ```
-4. Start the development server:
+4. Start the  server:
    ```sh
    npm run dev
    ```
@@ -75,6 +74,8 @@ PIXABAY_KEY=49219850-f17b895fdf8da291b7b3d49c6
 To create a production build, run:
 ```sh
 npm run build
+npm run start
+
 ```
 This will generate optimized static assets in the `dist/` folder.
 

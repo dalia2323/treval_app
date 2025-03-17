@@ -1,127 +1,118 @@
 import axios from "axios";
-import { getRdays } from './getRdays.js'; 
 
-const form = document.querySelector("form");
-const dateInp = document.querySelector("#date");
-const city_error = document.querySelector("#city_error");
-const cityInp = document.querySelector("#city");
-const date_error = document.querySelector("#date_error");
+const formElement = document.querySelector("#travelForm");
+const cityInput = document.getElementById("city");
+const dateInput = document.getElementById("date");
+const errorCity = document.getElementById("city_error");
+const errorDate = document.getElementById("date_error");
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validate_inputs()) return;
+formElement.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  resetErrors();
+
+  const cityName = cityInput.value.trim();
+  const travelDate = dateInput.value;
+
+  if (!cityName) {
+    displayError(errorCity, "Please provide the city you plan to visit.");
+    return;
+  }
+
+  const daysLeft = calculateDaysRemaining(travelDate);
+
+  if (daysLeft < 0) {
+    displayError(errorDate, "The travel date cannot be in the past.");
+    return;
+  }
 
   try {
-    const Location = await getCity();
-    if (Location.error) {
-      city_error.textContent = Location.error;
-      city_error.style.display = "block";
+    const cityData = await fetchCityData(cityName);
+    if (cityData.error) {
+      displayError(errorCity, cityData.error);
       return;
     }
-    city_error.style.display = "none";
 
-    const { name, lat, lng } = Location; // تصحيح: استخدام lng بدلًا من lang
-    const date = dateInp.value;
-    const Rdays = getRdays(date);
-
-    if (Rdays < 0) {
-      date_error.textContent = "Date cannot be in the past";
-      date_error.style.display = "block";
+    const weatherDetails = await retrieveWeatherInfo(cityData, daysLeft);
+    if (weatherDetails.error) {
+      displayError(errorDate, weatherDetails.error);
       return;
     }
-    date_error.style.display = "none";
 
-    const weatherData = await fetchWeather(lng, lat, Rdays); // تمرير lng بدلًا من lang
-    if (weatherData.error) {
-      date_error.textContent = weatherData.message;
-      date_error.style.display = "block";
-      return;
-    }
-    date_error.style.display = "none";
+    const imageURL = await fetchCityImage(cityData.name);
 
-    const { image } = await getCityPic(name);
-    updateUI(Rdays, name, image, weatherData);
-  } catch (error) {
-    console.error("Error:", error);
+    updateTripDetails(cityData.city, daysLeft, weatherDetails, imageURL);
+
+  } catch (err) {
+    console.error("Unexpected error:", err);
+  }
+});
+
+// Utility Functions
+
+const fetchCityData = async (city) => {
+  try {
+    const response = await axios.post("http://localhost:3003/api/getCity", { city });
+    return response.data;
+  } catch {
+    return { error: "Unable to find city information." };
   }
 };
 
-// الدوال المساعدة
-const fetchWeather = async (lng, lat, Rdays) => {
-  const { data } = await axios.post(
-    "http://localhost:3003/api/getWeather",
-    { lat, lng, Rdays },
-    { headers: { "Content-Type": "application/json" } }
-  );
-  return data;
-};
-
-const getCityPic = async (name) => {
-  const { data } = await axios.post(
-    "http://localhost:3003/api/getPic",
-    { name },
-    { headers: { "Content-Type": "application/json" } }
-  );
-  return data;
-};
-
-const getCity = async () => {
-  const city = cityInp.value;
-  if (!city) return;
-
+const retrieveWeatherInfo = async ({ lat, lng }, daysAhead) => {
   try {
-    const { data } = await axios.post(
-      "http://localhost:3003/api/getCity",
-      { city },
+    const { data } = await axios.post("http://localhost:3003/api/getWeather", {
+      lat,
+      lng,
+      Rdays: daysAhead,
+    });
+    return data;
+  } catch {
+    return { error: "Couldn't retrieve weather data." };
+  }
+};
+
+const fetchCityImage = async (cityName) => {
+  try {
+    const response = await axios.post("http://localhost:3003/api/getPic", 
+      { name: cityName }, 
       { headers: { "Content-Type": "application/json" } }
     );
-    return data;
+    return response.data.image;
   } catch (error) {
-    console.error("Error fetching city:", error.response?.data);
-    return { error: "Failed to fetch city data" };
+    console.error("Image fetch error:", error.response?.data || error.message);
+    return "https://source.unsplash.com/random/640x480?travel";
   }
 };
 
-const updateUI = (Rdays, city, pic, weather) => {
-  document.querySelector("#Rdays").innerHTML = `Your trip starts in ${Rdays} days.`;
-  document.querySelector(".cityName").textContent = `Location: ${city}`;
-  document.querySelector(".weather").textContent = `Weather: ${weather.description}`;
-  document.querySelector(".temp").innerHTML = `Temperature: ${weather.temp}&deg; C`;
+const updateTripDetails = (city, days, weather, imgSrc) => {
+  document.querySelector("#Rdays").textContent = `Only ${days} days until your adventure!`;
+  document.querySelector(".cityName").textContent = `Destination: ${city}`;
+  document.querySelector(".weather").textContent = `Forecast: ${weather.description}`;
+  document.querySelector(".temp").innerHTML = `Current Temp: ${weather.temp}&deg;C`;
 
-  if (Rdays > 7) {
-    document.querySelector(".max-temp").innerHTML = `Max Temp: ${weather.app_max_temp}&deg; C`;
-    document.querySelector(".min-temp").innerHTML = `Min Temp: ${weather.app_min_temp}&deg; C`;
-  } else {
-    document.querySelector(".max-temp").innerHTML = "";
-    document.querySelector(".min-temp").innerHTML = "";
-  }
+  document.querySelector(".max-temp").innerHTML = days > 7 ? `High: ${weather.app_max_temp}&deg;C` : "";
+  document.querySelector(".min-temp").innerHTML = days > 7 ? `Low: ${weather.app_min_temp}&deg;C` : "";
 
-  document.querySelector(".pic").innerHTML = `<img src="${pic}" alt="City Image">`;
+  document.querySelector(".pic").innerHTML = `<img src="${imgSrc}" alt="Destination Image">`;
   document.querySelector(".flight_data").style.display = "block";
 };
 
-const validate_inputs = () => {
-  city_error.style.display = "none";
-  date_error.style.display = "none";
-  if (!cityInp.value) {
-    city_error.innerHTML = "You need to enter a city name";
-    city_error.style.display = "block";
-    return false;
-  }
-  if (!dateInp.value) {
-    date_error.innerHTML = "You need to enter a valid date";
-    date_error.style.display = "block";
-    return false;
-  }
-  if (getRdays(dateInp.value) < 0) {
-    date_error.innerHTML = "Date can't be in the past";
-    date_error.style.display = "block";
-    return false;
-  }
-  return true;
+const calculateDaysRemaining = (futureDate) => {
+  const today = new Date().setHours(0,0,0,0);
+  const targetDate = new Date(futureDate).setHours(0,0,0,0);
+  return Math.round((targetDate - today) / (1000 * 60 * 60 * 24));
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-  form.addEventListener('submit', handleSubmit);
-});
-export { handleSubmit };
+const displayError = (element, message) => {
+  element.textContent = message;
+  element.style.display = "block";
+};
+
+const resetErrors = () => {
+  [errorCity, errorDate].forEach(err => {
+    err.textContent = "";
+    err.style.display = "none";
+  });
+};
+export { calculateDaysRemaining };
