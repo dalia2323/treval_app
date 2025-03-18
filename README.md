@@ -14,7 +14,7 @@ This project is a travel planning application that allows users to enter a city 
 - **Backend:** Node.js, Express.js
 - **APIs:** GeoNames, Weatherbit, Pixabay
 - **Build Tools:** Webpack
-
+- **NODE VERSION:v22.13.1
 ## Project Structure
 ```
 src/
